@@ -1,0 +1,216 @@
+<div id="bodyContainer">
+      <h1>Wordle</h1>
+      <p id="description">By Mittis</p>
+      <div id="mainContainer">
+        <div id="row1" class="row"></div>
+        <div id="row2" class="row"></div>
+        <div id="row3" class="row"></div>
+        <div id="row4" class="row"></div>
+        <div id="row5" class="row"></div>
+        <div id="row6" class="row"></div>
+      </div>
+      <br />
+      <div id="keyboard"></div>
+      <div id="graphic">
+        <div class="graphicRows">
+          <div id="c11" class="graphicBox"></div>
+          <div id="c12" class="graphicBox"></div>
+          <div id="c13" class="graphicBox"></div>
+          <div id="c14" class="graphicBox"></div>
+          <div id="c15" class="graphicBox"></div>
+        </div>
+        <div class="graphicRows">
+          <div id="c21" class="graphicBox"></div>
+          <div id="c22" class="graphicBox"></div>
+          <div id="c23" class="graphicBox"></div>
+          <div id="c24" class="graphicBox"></div>
+          <div id="c25" class="graphicBox"></div>
+        </div>
+        <div class="graphicRows">
+          <div id="c31" class="graphicBox"></div>
+          <div id="c32" class="graphicBox"></div>
+          <div id="c33" class="graphicBox"></div>
+          <div id="c34" class="graphicBox"></div>
+          <div id="c35" class="graphicBox"></div>
+        </div>
+        <div class="graphicRows">
+          <div id="c41" class="graphicBox"></div>
+          <div id="c42" class="graphicBox"></div>
+          <div id="c43" class="graphicBox"></div>
+          <div id="c44" class="graphicBox"></div>
+          <div id="c45" class="graphicBox"></div>
+        </div>
+        <div class="graphicRows">
+          <div id="c51" class="graphicBox"></div>
+          <div id="c52" class="graphicBox"></div>
+          <div id="c53" class="graphicBox"></div>
+          <div id="c54" class="graphicBox"></div>
+          <div id="c55" class="graphicBox"></div>
+        </div>
+        <div class="graphicRows">
+          <div id="c61" class="graphicBox"></div>
+          <div id="c62" class="graphicBox"></div>
+          <div id="c63" class="graphicBox"></div>
+          <div id="c64" class="graphicBox"></div>
+          <div id="c65" class="graphicBox"></div>
+        </div>
+      </div>
+    </div>
+<script>
+  const rowOne = document.getElementById("row1");
+  const rowTwo = document.getElementById("row2");
+  const rowThree = document.getElementById("row3");
+  const rowFour = document.getElementById("row4");
+  const rowFive = document.getElementById("row5");
+  const rowSix = document.getElementById("row6");
+  const keyboard = document.getElementById("keyboard");
+  const alphabet = [
+    ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+    ["a", "s", "d", "f", "g", "h", "j", "k", "l", "Enter"],
+    ["z", "x", "c", "v", "b", "n", "m", "Backspace"],
+  ];
+  const rows = [rowOne, rowTwo, rowThree, rowFour, rowFive, rowSix];
+  const spaces = [];
+  var word = "adieu";
+  var listWord = list(word);
+  var columnCounter = 0;
+  var rowCounter = 0;
+  var guesses = [];
+  var spaceGuesses = [];
+  var selectedKeys = [];
+  var position;
+
+  function reatTextFile() {
+    const fs = require('fs')
+    fs.readFile('Words.txt', 'utf8', (err,data) => {
+      if(err) {
+        console.error(err)
+        return
+      }
+      console.log(data)
+    })
+  }
+
+  // reatTextFile()
+
+  function list(word) {
+    var newWord = [];
+    for (let i = 0; i < word.length; i++) {
+      newWord.push(word[i]);
+    }
+    return newWord;
+  }
+
+  function indexof(list, element) {
+    var firstIndex;
+    var searching = true;
+    for(let i=0; i<list.length; i++) {
+      if(searching == true) {
+        if(list[i] == element) {
+          firstIndex = i;
+          searching = false;
+        }
+      }
+    }
+    return(firstIndex)
+  }
+
+  function createKeyboard() {
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < alphabet[i].length; j++) {
+        var newButton = document.createElement("button");
+        newButton.setAttribute("class", "keyboardButton");
+        if (i == 2) {
+          if (j == 7) {
+            newButton.setAttribute("id", "backspace");
+          }
+        }
+        newButton.innerHTML = alphabet[i][j];
+        keyboard.appendChild(newButton);
+      }
+    }
+  }
+
+  function createSpaces() {
+    for (let i = 0; i < 6; i++) {
+      for (let j = 0; j < 5; j++) {
+        var space = document.createElement("p");
+        space.setAttribute("class", "spaces");
+        space.innerHTML = " ";
+        rows[i].appendChild(space);
+        spaces.push(space);
+      }
+    }
+  }
+
+  function clickKey() {
+    onclick = (event) => {
+      if (event.target.innerHTML != "Enter") {
+        if (event.target.innerHTML != "Backspace") {
+          if (columnCounter <= 4) {
+            spaces[columnCounter + rowCounter * 5].innerHTML =
+              event.target.innerHTML;
+            guesses[columnCounter] = event.target.innerHTML;
+            spaceGuesses[columnCounter] = event.target;
+            selectedKeys[columnCounter] = event.target;
+            columnCounter += 1;
+          }
+        } else {
+          if (columnCounter <= 5) {
+            if (columnCounter >= 1) {
+              columnCounter -= 1;
+              spaces[columnCounter + rowCounter * 5].innerHTML = " ";
+              guesses[columnCounter] = "";
+              spaceGuesses[columnCounter] = ""
+              selectedKeys[-1] = "";
+            }
+          }
+        }
+      } else {
+        if (columnCounter == 5) {
+          columnCounter = 0;
+          rowCounter += 1;
+          for (let i = 0; i < 5; i++) {
+            if(selectedKeys[i].style.background != "rgb(0, 255, 0)") {
+              if(selectedKeys[i].style.background != "rgb(255, 255, 0)") {
+                selectedKeys[i].style.background = "#777";
+              }
+            }
+          }
+          checkCorrect();
+          guesses = [];
+          spaceGuesses = [];
+          selectedKeys = [];
+        }
+      }
+    };
+  }
+
+  function checkCorrect() {
+    for (let i = 0; i < 5; i++) {
+      if (guesses[i] == listWord[i]) {
+        spaces[(rowCounter - 1) * 5 + i].style.background = "#00FF00";
+        spaceGuesses[i].style.background = "#00FF00";
+        listWord[i] = "-";
+      } else {
+        for (let j = 0; j < 5; j++) {
+          if (guesses[i] == listWord[j]) {
+            spaces[(rowCounter - 1) * 5 + i].style.background = "yellow";
+            console.log(typeof(spaceGuesses[i].style.background))
+            console.log(spaceGuesses[i].style.background)
+            if(spaceGuesses[i].style.background != "rgb(0, 255, 0)") {
+              spaceGuesses[i].style.background = "yellow"
+            }
+            position = indexof(listWord, guesses[i])
+            listWord[position] = "-"
+          }
+        }
+      }
+    }
+    listWord = list(word);
+  }
+
+  createKeyboard();
+  createSpaces();
+  clickKey();
+</script>
